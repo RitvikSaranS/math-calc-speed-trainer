@@ -20,7 +20,7 @@ export function generateOptions(p: Problem, count = 4): string[] {
   const needed = count - 1;
 
   if (p.hasRemainder && p.remainder !== undefined) {
-    const divisor = p.operands[1];
+    const divisor = p.divisor ?? 10;
     const quotientDeltas = shuffle(deltaSequence(Math.max(3, needed * 2)));
     const remainderDeltas = shuffle(deltaSequence(Math.max(2, divisor)));
     outer: for (const qDelta of quotientDeltas) {

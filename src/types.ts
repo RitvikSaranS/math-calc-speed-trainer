@@ -1,31 +1,28 @@
-export type Operation = 'addition' | 'subtraction' | 'multiplication' | 'division';
+export type Operation =
+  | 'addition'
+  | 'subtraction'
+  | 'multiplication'
+  | 'division'
+  | 'squareRoot'
+  | 'cubeRoot'
+  | 'squaring';
 
-export type MasterMode = 'enter' | 'options' | 'flashcard' | 'flash';
+export type MasterMode = 'enter' | 'options' | 'flashcard';
 
-export interface FlashConfig {
-  digitSize: number;
-  count: number;
-}
-
-export interface FlashRound {
-  numbers: number[];
-  digitSize: number;
-  answer: number;
-}
+export type ConfigGroup = 'default' | 'customSize' | 'customNumbers';
 
 export interface Problem {
   question: string;
-  operands: [number, number];
-  operation: Operation;
   answer: number;
-  remainder?: number;
   hasRemainder: boolean;
+  remainder?: number;
+  divisor?: number;
 }
 
 export interface ModeDef {
   id: string;
   label: string;
   operation: Operation;
-  group: 'Standard' | 'Custom';
+  group: ConfigGroup;
   generate: () => Problem;
 }

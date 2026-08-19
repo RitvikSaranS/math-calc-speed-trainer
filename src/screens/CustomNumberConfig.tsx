@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import type { ModeDef, Operation } from '../types';
-import { DIGIT_SIZE_MIN, buildCustomSizeMode } from '../lib/modes';
+import { DIGIT_SIZE_MIN, buildCustomNumberMode } from '../lib/modes';
 import { OPERATION_META } from '../lib/operationMeta';
 import NumberField from '../components/NumberField';
+import DigitPoolPicker from '../components/DigitPoolPicker';
 
-export default function CustomConfig({
+export default function CustomNumberConfig({
   operation,
   onContinue,
   onBack,
@@ -15,14 +16,15 @@ export default function CustomConfig({
 }) {
   const meta = OPERATION_META[operation];
   const isTwoOperand = meta.operandCount === 2;
-  const [sizeA, setSizeA] = useState(operation === 'division' ? Math.min(5, meta.sizeLimits.a) : Math.min(3, meta.sizeLimits.a));
-  const [sizeB, setSizeB] = useState(operation === 'division' ? Math.min(2, meta.sizeLimits.b) : Math.min(3, meta.sizeLimits.b));
+  const [sizeA, setSizeA] = useState(operation === 'division' ? Math.min(4, meta.sizeLimits.a) : Math.min(2, meta.sizeLimits.a));
+  const [sizeB, setSizeB] = useState(operation === 'division' ? Math.min(2, meta.sizeLimits.b) : Math.min(2, meta.sizeLimits.b));
   const [withRemainder, setWithRemainder] = useState(false);
+  const [pool, setPool] = useState<number[]>([7, 8, 9]);
 
   const [labelA, labelB] = meta.fieldLabels;
 
   function handleContinue() {
-    onContinue(buildCustomSizeMode(operation, { a: sizeA, b: isTwoOperand ? sizeB : sizeA, withRemainder }));
+    onContinue(buildCustomNumberMode(operation, { a: sizeA, b: isTwoOperand ? sizeB : sizeA, withRemainder }, pool));
   }
 
   return (
@@ -30,10 +32,8 @@ export default function CustomConfig({
       <button className="back-link" onClick={onBack}>
         ← Back
       </button>
-      <h1 className="title">Custom Size {meta.label}</h1>
-      <p className="subtitle">
-        {isTwoOperand ? "Pick the size of each number — they don't need to match." : 'Pick the digit length to practice with.'}
-      </p>
+      <h1 className="title">Custom Numbers {meta.label}</h1>
+      <p className="subtitle">{meta.customNumberNote}</p>
 
       <div className="custom-config-form">
         <NumberField label={labelA} value={sizeA} min={DIGIT_SIZE_MIN} max={meta.sizeLimits.a} onChange={setSizeA} />
@@ -48,6 +48,10 @@ export default function CustomConfig({
           </label>
         )}
       </div>
+
+      <h2 className="section-heading">Digits to Use</h2>
+      <p className="section-desc">Pick at least one digit — problems will be built only from the digits you select here.</p>
+      <DigitPoolPicker selected={pool} onChange={setPool} />
 
       <button className="primary-button" onClick={handleContinue}>
         Continue

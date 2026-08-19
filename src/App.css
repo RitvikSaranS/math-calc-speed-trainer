@@ -69,6 +69,12 @@
   margin: 1.5rem 0 0.75rem;
 }
 
+.section-desc {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin: -0.5rem 0 0.75rem;
+}
+
 .back-link {
   align-self: flex-start;
   background: none;
@@ -148,6 +154,82 @@
 .tile-selected {
   border-color: var(--accent);
   background: var(--accent-dim);
+}
+
+/* Home screen */
+
+.guide-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  width: 100%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin: 1rem 0 1.25rem;
+  text-align: left;
+}
+
+.guide-tile:hover {
+  border-color: var(--accent);
+  filter: brightness(1.05);
+}
+
+.guide-tile-label {
+  color: var(--accent);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.guide-tile-desc {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.operation-grid {
+  margin-top: 0.25rem;
+}
+
+.operation-grid .tile {
+  gap: 0.3rem;
+  padding: 1.25rem 1rem;
+}
+
+.operation-grid .tile-desc {
+  font-size: 0.8rem;
+}
+
+/* Digit pool picker */
+
+.digit-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.digit-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.digit-chip:hover {
+  border-color: var(--accent);
+}
+
+.digit-chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 /* Master select */
@@ -430,38 +512,123 @@
   margin-top: 0;
 }
 
-.flash-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+/* Guide screen */
+
+.guide-section {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
 }
 
-.flash-number-display {
-  width: 100%;
-  min-height: 160px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 16px;
+.guide-section:first-of-type {
+  margin-top: 1.25rem;
+  padding-top: 0;
+  border-top: none;
+}
+
+.guide-heading {
   display: flex;
   align-items: center;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  margin: 0 0 1rem;
+}
+
+.guide-symbol {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  font-size: clamp(2.4rem, 10vw, 4rem);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0 0 1.25rem;
+  padding-left: 1.3rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.guide-example {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.guide-example-title {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+
+.guide-line {
+  margin: 0.3rem 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.guide-result {
+  margin: 0.6rem 0 0;
   font-weight: 700;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 
-.flash-progress {
+.guide-tip {
   color: var(--text-dim);
-  font-size: 0.9rem;
-  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0.5rem 0 0;
 }
 
-.flash-prompt {
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin: 0 0 0.25rem;
+.coming-soon-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.coming-soon-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.coming-soon-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.coming-soon-label {
+  font-weight: 600;
+  min-width: 6.5rem;
+}
+
+.coming-soon-note {
+  color: var(--text-dim);
+  font-size: 0.85rem;
 }
 
 /* Summary screen */

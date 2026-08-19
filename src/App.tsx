@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import type { FlashConfig, MasterMode, ModeDef, Operation } from './types';
+import type { MasterMode, ModeDef, Operation } from './types';
 import { useTheme } from './lib/theme';
 import ThemeToggle from './components/ThemeToggle';
 import Home from './screens/Home';
+import Guide from './screens/Guide';
 import ModeSelect from './screens/ModeSelect';
 import CustomConfig from './screens/CustomConfig';
-import DigitComboConfig from './screens/DigitComboConfig';
+import CustomNumberConfig from './screens/CustomNumberConfig';
 import MasterSelect from './screens/MasterSelect';
 import Practice, { type SessionResult } from './screens/Practice';
 import Summary from './screens/Summary';
 import './App.css';
 
-type Screen = 'home' | 'modes' | 'customConfig' | 'digitCombo' | 'master' | 'practice' | 'summary';
+type Screen = 'home' | 'guide' | 'modes' | 'customSize' | 'customNumbers' | 'master' | 'practice' | 'summary';
 
 function App() {
   const { preference, setThemePreference } = useTheme();
@@ -20,7 +21,6 @@ function App() {
   const [mode, setMode] = useState<ModeDef | null>(null);
   const [master, setMaster] = useState<MasterMode>('enter');
   const [questionCount, setQuestionCount] = useState(10);
-  const [flashConfig, setFlashConfig] = useState<FlashConfig>({ digitSize: 2, count: 10 });
   const [results, setResults] = useState<SessionResult[]>([]);
   const [sessionKey, setSessionKey] = useState(0);
 
@@ -34,20 +34,19 @@ function App() {
     setScreen('master');
   }
 
-  function openCustomConfig(op: Operation) {
+  function openCustomSize(op: Operation) {
     setOperation(op);
-    setScreen('customConfig');
+    setScreen('customSize');
   }
 
-  function openDigitCombo(op: Operation) {
+  function openCustomNumbers(op: Operation) {
     setOperation(op);
-    setScreen('digitCombo');
+    setScreen('customNumbers');
   }
 
-  function startPractice(masterMode: MasterMode, count: number, flash: FlashConfig) {
+  function startPractice(masterMode: MasterMode, count: number) {
     setMaster(masterMode);
     setQuestionCount(count);
-    setFlashConfig(flash);
     setSessionKey((k) => k + 1);
     setScreen('practice');
   }
@@ -66,40 +65,30 @@ function App() {
     <div className="app-shell">
       <ThemeToggle preference={preference} onChange={setThemePreference} />
 
-      {screen === 'home' && <Home onSelect={selectOperation} />}
+      {screen === 'home' && <Home onSelect={selectOperation} onGuide={() => setScreen('guide')} />}
+
+      {screen === 'guide' && <Guide onBack={() => setScreen('home')} />}
 
       {screen === 'modes' && operation && (
         <ModeSelect
           operation={operation}
           onSelect={selectMode}
-          onCustomSize={openCustomConfig}
-          onDigitCombo={openDigitCombo}
+          onCustomSize={openCustomSize}
+          onCustomNumbers={openCustomNumbers}
           onBack={() => setScreen('home')}
         />
       )}
 
-      {screen === 'customConfig' && operation && (
-        <CustomConfig
-          operation={operation}
-          onContinue={selectMode}
-          onBack={() => setScreen('modes')}
-        />
+      {screen === 'customSize' && operation && (
+        <CustomConfig operation={operation} onContinue={selectMode} onBack={() => setScreen('modes')} />
       )}
 
-      {screen === 'digitCombo' && (operation === 'addition' || operation === 'subtraction') && (
-        <DigitComboConfig
-          operation={operation}
-          onContinue={selectMode}
-          onBack={() => setScreen('modes')}
-        />
+      {screen === 'customNumbers' && operation && (
+        <CustomNumberConfig operation={operation} onContinue={selectMode} onBack={() => setScreen('modes')} />
       )}
 
       {screen === 'master' && mode && (
-        <MasterSelect
-          mode={mode}
-          onStart={startPractice}
-          onBack={() => setScreen('modes')}
-        />
+        <MasterSelect mode={mode} onStart={startPractice} onBack={() => setScreen('modes')} />
       )}
 
       {screen === 'practice' && mode && (
@@ -108,7 +97,6 @@ function App() {
           mode={mode}
           master={master}
           questionCount={questionCount}
-          flashConfig={flashConfig}
           onFinish={finishPractice}
           onQuit={() => setScreen('master')}
         />
