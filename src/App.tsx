@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { MasterMode, ModeDef, Operation } from './types';
+import type { FlashSettings, FlashVariant } from './lib/flash';
 import { useTheme } from './lib/theme';
 import ThemeToggle from './components/ThemeToggle';
 import Home from './screens/Home';
@@ -10,9 +11,21 @@ import CustomNumberConfig from './screens/CustomNumberConfig';
 import MasterSelect from './screens/MasterSelect';
 import Practice, { type SessionResult } from './screens/Practice';
 import Summary from './screens/Summary';
+import FlashSetup from './screens/FlashSetup';
+import FlashRound from './screens/FlashRound';
 import './App.css';
 
-type Screen = 'home' | 'guide' | 'modes' | 'customSize' | 'customNumbers' | 'master' | 'practice' | 'summary';
+type Screen =
+  | 'home'
+  | 'guide'
+  | 'modes'
+  | 'customSize'
+  | 'customNumbers'
+  | 'master'
+  | 'practice'
+  | 'summary'
+  | 'flashSetup'
+  | 'flashRound';
 
 function App() {
   const { preference, setThemePreference } = useTheme();
@@ -23,6 +36,8 @@ function App() {
   const [questionCount, setQuestionCount] = useState(10);
   const [results, setResults] = useState<SessionResult[]>([]);
   const [sessionKey, setSessionKey] = useState(0);
+  const [flashVariant, setFlashVariant] = useState<FlashVariant>('addition');
+  const [flashSettings, setFlashSettings] = useState<FlashSettings | null>(null);
 
   function selectOperation(op: Operation) {
     setOperation(op);
@@ -61,11 +76,21 @@ function App() {
     setScreen('practice');
   }
 
+  function openFlash(variant: FlashVariant) {
+    setFlashVariant(variant);
+    setScreen('flashSetup');
+  }
+
+  function startFlash(settings: FlashSettings) {
+    setFlashSettings(settings);
+    setScreen('flashRound');
+  }
+
   return (
     <div className="app-shell">
       <ThemeToggle preference={preference} onChange={setThemePreference} />
 
-      {screen === 'home' && <Home onSelect={selectOperation} onGuide={() => setScreen('guide')} />}
+      {screen === 'home' && <Home onSelect={selectOperation} onGuide={() => setScreen('guide')} onFlash={openFlash} />}
 
       {screen === 'guide' && <Guide onBack={() => setScreen('home')} />}
 
@@ -113,6 +138,19 @@ function App() {
             setMode(null);
             setScreen('home');
           }}
+        />
+      )}
+
+      {screen === 'flashSetup' && (
+        <FlashSetup variant={flashVariant} onContinue={startFlash} onBack={() => setScreen('home')} />
+      )}
+
+      {screen === 'flashRound' && flashSettings && (
+        <FlashRound
+          variant={flashVariant}
+          settings={flashSettings}
+          onChangeSettings={() => setScreen('flashSetup')}
+          onHome={() => setScreen('home')}
         />
       )}
     </div>

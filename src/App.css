@@ -436,21 +436,6 @@
   border-color: var(--accent);
 }
 
-.answer-input.correct {
-  border-color: var(--success);
-  background: var(--success-bg);
-}
-
-.answer-input.incorrect {
-  border-color: var(--danger);
-  background: var(--danger-bg);
-}
-
-.reveal-answer {
-  color: var(--danger);
-  font-weight: 500;
-}
-
 .options-grid {
   margin-top: 0.5rem;
 }
@@ -459,18 +444,6 @@
   font-size: 1.3rem;
   font-weight: 600;
   padding: 1.25rem;
-}
-
-.tile-option.correct {
-  border-color: var(--success);
-  background: var(--success-bg);
-  color: var(--success);
-}
-
-.tile-option.incorrect {
-  border-color: var(--danger);
-  background: var(--danger-bg);
-  color: var(--danger);
 }
 
 .flashcard-area {
@@ -510,6 +483,99 @@
 .flashcard-actions button {
   flex: 1;
   margin-top: 0;
+}
+
+/* Flash rounds */
+
+.flash-start-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.flash-start-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.flash-sign-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+}
+
+.flash-sign-badge.add {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.flash-sign-badge.subtract {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.flash-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.flash-number-display {
+  width: 100%;
+  min-height: 160px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2.4rem, 10vw, 4rem);
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.flash-prompt {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 0.25rem;
+}
+
+.flash-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.flash-result-headline {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.flash-result-headline.correct {
+  color: var(--success);
+}
+
+.flash-result-headline.incorrect {
+  color: var(--danger);
+}
+
+.flash-result-answer {
+  color: var(--text-dim);
+  margin: 0 0 0.5rem;
 }
 
 /* Guide screen */

@@ -1,12 +1,15 @@
 import type { Operation } from '../types';
+import type { FlashVariant } from '../lib/flash';
 import { OPERATION_META, OPERATION_ORDER } from '../lib/operationMeta';
 
 export default function Home({
   onSelect,
   onGuide,
+  onFlash,
 }: {
   onSelect: (op: Operation) => void;
   onGuide: () => void;
+  onFlash: (variant: FlashVariant) => void;
 }) {
   return (
     <div className="screen">
@@ -29,6 +32,21 @@ export default function Home({
             </button>
           );
         })}
+      </div>
+
+      <h2 className="section-heading">Flash Rounds</h2>
+      <p className="section-desc">Numbers flash on screen automatically — keep a running total in your head.</p>
+      <div className="grid grid-2">
+        <button className="tile" onClick={() => onFlash('addition')}>
+          <span className="tile-symbol">+</span>
+          <span className="tile-label">Flash Addition</span>
+          <span className="tile-desc">Starts at zero — add each flashed number as it appears.</span>
+        </button>
+        <button className="tile" onClick={() => onFlash('subtraction')}>
+          <span className="tile-symbol">−</span>
+          <span className="tile-label">Flash Subtraction</span>
+          <span className="tile-desc">Starts at a number you choose — subtract each flashed number as it appears.</span>
+        </button>
       </div>
     </div>
   );

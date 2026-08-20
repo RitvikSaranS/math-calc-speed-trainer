@@ -7,10 +7,6 @@ export interface SessionResult {
   timeMs: number;
 }
 
-type Feedback = 'none' | 'correct' | 'incorrect';
-
-const FEEDBACK_DELAY_MS = 700;
-
 export default function Practice({
   mode,
   master,
@@ -28,11 +24,9 @@ export default function Practice({
   const [problem, setProblem] = useState<Problem>(() => mode.generate());
   const [results, setResults] = useState<SessionResult[]>([]);
   const [startTime, setStartTime] = useState(() => Date.now());
-  const [feedback, setFeedback] = useState<Feedback>('none');
   const [revealed, setRevealed] = useState(false);
   const [answerInput, setAnswerInput] = useState('');
   const [remainderInput, setRemainderInput] = useState('');
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -44,52 +38,38 @@ export default function Practice({
     }
   }, [problem, master]);
 
-  function advance(latestResults: SessionResult[]) {
+  function recordAndAdvance(correct: boolean) {
+    const newResults = [...results, { correct, timeMs: Date.now() - startTime }];
+    setResults(newResults);
+
     const newIndex = index + 1;
     if (newIndex >= questionCount) {
-      onFinish(latestResults);
+      onFinish(newResults);
       return;
     }
     setIndex(newIndex);
     setStartTime(Date.now());
-    setFeedback('none');
     setProblem(mode.generate());
     setRevealed(false);
     setAnswerInput('');
     setRemainderInput('');
-    setSelectedOption(null);
-  }
-
-  function recordAndAdvance(correct: boolean, delay: number) {
-    const newResults = [...results, { correct, timeMs: Date.now() - startTime }];
-    setResults(newResults);
-    if (delay > 0) {
-      setTimeout(() => advance(newResults), delay);
-    } else {
-      advance(newResults);
-    }
   }
 
   function handleEnterSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (feedback !== 'none' || answerInput.trim() === '') return;
+    if (answerInput.trim() === '') return;
     const correct = problem.hasRemainder
       ? parseInt(answerInput, 10) === problem.answer && parseInt(remainderInput, 10) === problem.remainder
       : parseInt(answerInput, 10) === problem.answer;
-    setFeedback(correct ? 'correct' : 'incorrect');
-    recordAndAdvance(correct, FEEDBACK_DELAY_MS);
+    recordAndAdvance(correct);
   }
 
   function handleOptionClick(opt: string) {
-    if (selectedOption) return;
-    setSelectedOption(opt);
-    const correct = opt === formatAnswer(problem);
-    setFeedback(correct ? 'correct' : 'incorrect');
-    recordAndAdvance(correct, FEEDBACK_DELAY_MS);
+    recordAndAdvance(opt === formatAnswer(problem));
   }
 
   function handleFlashcardResult(correct: boolean) {
-    recordAndAdvance(correct, 0);
+    recordAndAdvance(correct);
   }
 
   return (
@@ -114,10 +94,9 @@ export default function Practice({
               ref={inputRef}
               type="number"
               inputMode="numeric"
-              className={`answer-input ${feedback}`}
+              className="answer-input"
               value={answerInput}
               onChange={(e) => setAnswerInput(e.target.value)}
-              disabled={feedback !== 'none'}
               placeholder={problem.hasRemainder ? 'Quotient' : 'Answer'}
               autoFocus
             />
@@ -125,37 +104,26 @@ export default function Practice({
               <input
                 type="number"
                 inputMode="numeric"
-                className={`answer-input ${feedback}`}
+                className="answer-input"
                 value={remainderInput}
                 onChange={(e) => setRemainderInput(e.target.value)}
-                disabled={feedback !== 'none'}
                 placeholder="Remainder"
               />
             )}
           </div>
-          <button type="submit" className="primary-button" disabled={feedback !== 'none'}>
+          <button type="submit" className="primary-button">
             Submit
           </button>
-          {feedback === 'incorrect' && (
-            <p className="reveal-answer">Correct answer: {formatAnswer(problem)}</p>
-          )}
         </form>
       )}
 
       {master === 'options' && (
         <div className="grid grid-2 options-grid">
-          {options.map((opt) => {
-            let cls = 'tile tile-option';
-            if (selectedOption) {
-              if (opt === formatAnswer(problem)) cls += ' correct';
-              else if (opt === selectedOption) cls += ' incorrect';
-            }
-            return (
-              <button key={opt} className={cls} onClick={() => handleOptionClick(opt)} disabled={!!selectedOption}>
-                {opt}
-              </button>
-            );
-          })}
+          {options.map((opt) => (
+            <button key={opt} className="tile tile-option" onClick={() => handleOptionClick(opt)}>
+              {opt}
+            </button>
+          ))}
         </div>
       )}
 
