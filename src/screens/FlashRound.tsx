@@ -18,7 +18,7 @@ export default function FlashRound({
   const isSubtraction = variant === 'subtraction';
 
   const [sequence, setSequence] = useState<FlashSequence>(() =>
-    generateFlashSequence(variant, settings.iterations, settings.startingNumber),
+    generateFlashSequence(variant, settings.iterations, settings.startingNumber, settings.numberDigits),
   );
   const [phase, setPhase] = useState<Phase>('flashing');
   const [index, setIndex] = useState(0);
@@ -49,7 +49,7 @@ export default function FlashRound({
   }
 
   function practiceAgain() {
-    setSequence(generateFlashSequence(variant, settings.iterations, settings.startingNumber));
+    setSequence(generateFlashSequence(variant, settings.iterations, settings.startingNumber, settings.numberDigits));
     setIndex(0);
     setAnswerInput('');
     setPhase('flashing');

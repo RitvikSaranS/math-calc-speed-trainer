@@ -7,6 +7,8 @@ import {
   FLASH_INTERVAL_MIN,
   FLASH_STARTING_NUMBER_MAX,
   FLASH_STARTING_NUMBER_MIN,
+  FLASH_DIGITS_MAX,
+  FLASH_DIGITS_MIN,
 } from '../lib/flash';
 import NumberField from '../components/NumberField';
 import DecimalField from '../components/DecimalField';
@@ -24,6 +26,7 @@ export default function FlashSetup({
   const [iterations, setIterations] = useState(10);
   const [intervalSeconds, setIntervalSeconds] = useState(1);
   const [startingNumber, setStartingNumber] = useState(1000);
+  const [numberDigits, setNumberDigits] = useState(2);
 
   return (
     <div className="screen">
@@ -54,6 +57,13 @@ export default function FlashSetup({
           max={FLASH_ITERATIONS_MAX}
           onChange={setIterations}
         />
+        <NumberField
+          label="Digits per flashed number"
+          value={numberDigits}
+          min={FLASH_DIGITS_MIN}
+          max={FLASH_DIGITS_MAX}
+          onChange={setNumberDigits}
+        />
         <DecimalField
           label="Time between numbers"
           value={intervalSeconds}
@@ -65,7 +75,9 @@ export default function FlashSetup({
 
       <button
         className="primary-button"
-        onClick={() => onContinue({ iterations, intervalSeconds, startingNumber: isSubtraction ? startingNumber : 0 })}
+        onClick={() =>
+          onContinue({ iterations, intervalSeconds, startingNumber: isSubtraction ? startingNumber : 0, numberDigits })
+        }
       >
         Start
       </button>
