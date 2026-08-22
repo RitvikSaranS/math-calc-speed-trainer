@@ -681,6 +681,19 @@
   flex-shrink: 0;
 }
 
+.guide-intro {
+  color: var(--text-dim);
+  line-height: 1.55;
+  margin: 0 0 1.1rem;
+}
+
+.guide-lead-in {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+}
+
 .guide-steps {
   display: flex;
   flex-direction: column;
