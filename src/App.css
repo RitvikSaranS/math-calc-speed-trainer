@@ -498,6 +498,21 @@
   border-color: var(--accent);
 }
 
+.answer-input.correct {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.answer-input.incorrect {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.reveal-answer {
+  color: var(--danger);
+  font-weight: 500;
+}
+
 .options-grid {
   margin-top: 0.5rem;
 }
@@ -506,6 +521,18 @@
   font-size: 1.3rem;
   font-weight: 600;
   padding: 1.25rem;
+}
+
+.tile-option.correct {
+  border-color: var(--success);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.tile-option.incorrect {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .flashcard-area {

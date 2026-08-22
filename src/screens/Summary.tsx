@@ -4,17 +4,20 @@ export default function Summary({
   results,
   modeLabel,
   onRestart,
+  onRetryWrong,
   onChangeMode,
   onHome,
 }: {
   results: SessionResult[];
   modeLabel: string;
   onRestart: () => void;
+  onRetryWrong: () => void;
   onChangeMode: () => void;
   onHome: () => void;
 }) {
   const total = results.length;
   const correct = results.filter((r) => r.correct).length;
+  const wrongCount = total - correct;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
   const totalTimeMs = results.reduce((sum, r) => sum + r.timeMs, 0);
   const avgTimeMs = total > 0 ? totalTimeMs / total : 0;
@@ -45,8 +48,13 @@ export default function Summary({
 
       <div className="summary-actions">
         <button className="primary-button" onClick={onRestart}>
-          Practice Again
+          Retry
         </button>
+        {wrongCount > 0 && (
+          <button className="secondary-button" onClick={onRetryWrong}>
+            Retry Wrong Ones ({wrongCount})
+          </button>
+        )}
         <button className="secondary-button" onClick={onChangeMode}>
           Change Mode
         </button>

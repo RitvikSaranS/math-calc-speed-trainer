@@ -5,71 +5,96 @@ import { formatAnswer, generateOptions } from '../lib/answer';
 export interface SessionResult {
   correct: boolean;
   timeMs: number;
+  problem: Problem;
 }
+
+type Feedback = 'none' | 'correct' | 'incorrect';
+
+const FEEDBACK_DELAY_MS = 300;
 
 export default function Practice({
   mode,
   master,
   questionCount,
+  fixedProblems,
   onFinish,
   onQuit,
 }: {
   mode: ModeDef;
   master: MasterMode;
   questionCount: number;
+  fixedProblems?: Problem[];
   onFinish: (results: SessionResult[]) => void;
   onQuit: () => void;
 }) {
+  const total = fixedProblems ? fixedProblems.length : questionCount;
+
   const [index, setIndex] = useState(0);
-  const [problem, setProblem] = useState<Problem>(() => mode.generate());
+  const [problem, setProblem] = useState<Problem>(() => (fixedProblems ? fixedProblems[0] : mode.generate()));
   const [results, setResults] = useState<SessionResult[]>([]);
   const [startTime, setStartTime] = useState(() => Date.now());
+  const [feedback, setFeedback] = useState<Feedback>('none');
   const [revealed, setRevealed] = useState(false);
   const [answerInput, setAnswerInput] = useState('');
   const [remainderInput, setRemainderInput] = useState('');
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const options = useMemo(() => (master === 'options' ? generateOptions(problem) : []), [problem, master]);
 
   useEffect(() => {
-    if (master === 'enter') {
+    if (master === 'enter' && feedback === 'none') {
       inputRef.current?.focus();
     }
-  }, [problem, master]);
+  }, [problem, master, feedback]);
 
-  function recordAndAdvance(correct: boolean) {
-    const newResults = [...results, { correct, timeMs: Date.now() - startTime }];
-    setResults(newResults);
-
+  function advance(latestResults: SessionResult[]) {
     const newIndex = index + 1;
-    if (newIndex >= questionCount) {
-      onFinish(newResults);
+    if (newIndex >= total) {
+      onFinish(latestResults);
       return;
     }
     setIndex(newIndex);
     setStartTime(Date.now());
-    setProblem(mode.generate());
+    setFeedback('none');
+    setProblem(fixedProblems ? fixedProblems[newIndex] : mode.generate());
     setRevealed(false);
     setAnswerInput('');
     setRemainderInput('');
+    setSelectedOption(null);
+  }
+
+  function recordAndAdvance(correct: boolean, delay: number) {
+    const newResults = [...results, { correct, timeMs: Date.now() - startTime, problem }];
+    setResults(newResults);
+    if (delay > 0) {
+      setTimeout(() => advance(newResults), delay);
+    } else {
+      advance(newResults);
+    }
   }
 
   function handleEnterSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (answerInput.trim() === '') return;
+    if (feedback !== 'none' || answerInput.trim() === '') return;
     const correct = problem.hasRemainder
       ? parseInt(answerInput, 10) === problem.answer && parseInt(remainderInput, 10) === problem.remainder
       : parseInt(answerInput, 10) === problem.answer;
-    recordAndAdvance(correct);
+    setFeedback(correct ? 'correct' : 'incorrect');
+    recordAndAdvance(correct, FEEDBACK_DELAY_MS);
   }
 
   function handleOptionClick(opt: string) {
-    recordAndAdvance(opt === formatAnswer(problem));
+    if (selectedOption) return;
+    setSelectedOption(opt);
+    const correct = opt === formatAnswer(problem);
+    setFeedback(correct ? 'correct' : 'incorrect');
+    recordAndAdvance(correct, FEEDBACK_DELAY_MS);
   }
 
   function handleFlashcardResult(correct: boolean) {
-    recordAndAdvance(correct);
+    recordAndAdvance(correct, 0);
   }
 
   return (
@@ -79,7 +104,7 @@ export default function Practice({
           ← Quit
         </button>
         <span className="progress-label">
-          Question {index + 1} / {questionCount}
+          Question {index + 1} / {total}
         </span>
       </div>
 
@@ -94,9 +119,10 @@ export default function Practice({
               ref={inputRef}
               type="number"
               inputMode="numeric"
-              className="answer-input"
+              className={`answer-input ${feedback}`}
               value={answerInput}
               onChange={(e) => setAnswerInput(e.target.value)}
+              disabled={feedback !== 'none'}
               placeholder={problem.hasRemainder ? 'Quotient' : 'Answer'}
               autoFocus
             />
@@ -104,26 +130,35 @@ export default function Practice({
               <input
                 type="number"
                 inputMode="numeric"
-                className="answer-input"
+                className={`answer-input ${feedback}`}
                 value={remainderInput}
                 onChange={(e) => setRemainderInput(e.target.value)}
+                disabled={feedback !== 'none'}
                 placeholder="Remainder"
               />
             )}
           </div>
-          <button type="submit" className="primary-button">
+          <button type="submit" className="primary-button" disabled={feedback !== 'none'}>
             Submit
           </button>
+          {feedback === 'incorrect' && <p className="reveal-answer">Correct answer: {formatAnswer(problem)}</p>}
         </form>
       )}
 
       {master === 'options' && (
         <div className="grid grid-2 options-grid">
-          {options.map((opt) => (
-            <button key={opt} className="tile tile-option" onClick={() => handleOptionClick(opt)}>
-              {opt}
-            </button>
-          ))}
+          {options.map((opt) => {
+            let cls = 'tile tile-option';
+            if (selectedOption) {
+              if (opt === formatAnswer(problem)) cls += ' correct';
+              else if (opt === selectedOption) cls += ' incorrect';
+            }
+            return (
+              <button key={opt} className={cls} onClick={() => handleOptionClick(opt)} disabled={!!selectedOption}>
+                {opt}
+              </button>
+            );
+          })}
         </div>
       )}
 

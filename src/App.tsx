@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { MasterMode, ModeDef, Operation } from './types';
+import type { MasterMode, ModeDef, Operation, Problem } from './types';
 import type { FlashSettings, FlashVariant } from './lib/flash';
 import { useTheme } from './lib/theme';
 import ThemeToggle from './components/ThemeToggle';
@@ -39,6 +39,7 @@ function App() {
   const [master, setMaster] = useState<MasterMode>('enter');
   const [questionCount, setQuestionCount] = useState(10);
   const [results, setResults] = useState<SessionResult[]>([]);
+  const [fixedProblems, setFixedProblems] = useState<Problem[] | undefined>(undefined);
   const [sessionKey, setSessionKey] = useState(0);
   const [flashVariant, setFlashVariant] = useState<FlashVariant>('addition');
   const [flashSettings, setFlashSettings] = useState<FlashSettings | null>(null);
@@ -66,6 +67,7 @@ function App() {
   function startPractice(masterMode: MasterMode, count: number) {
     setMaster(masterMode);
     setQuestionCount(count);
+    setFixedProblems(undefined);
     setSessionKey((k) => k + 1);
     setScreen('practice');
   }
@@ -76,6 +78,15 @@ function App() {
   }
 
   function restart() {
+    setFixedProblems(undefined);
+    setSessionKey((k) => k + 1);
+    setScreen('practice');
+  }
+
+  function retryWrong() {
+    const wrong = results.filter((r) => !r.correct).map((r) => r.problem);
+    if (wrong.length === 0) return;
+    setFixedProblems(wrong);
     setSessionKey((k) => k + 1);
     setScreen('practice');
   }
@@ -130,6 +141,7 @@ function App() {
           mode={mode}
           master={master}
           questionCount={questionCount}
+          fixedProblems={fixedProblems}
           onFinish={finishPractice}
           onQuit={() => setScreen('master')}
         />
@@ -140,6 +152,7 @@ function App() {
           results={results}
           modeLabel={mode.label}
           onRestart={restart}
+          onRetryWrong={retryWrong}
           onChangeMode={() => setScreen('modes')}
           onHome={() => {
             setOperation(null);
