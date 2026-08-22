@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ModeDef, Operation } from '../types';
 import { DIGIT_SIZE_MIN, buildCustomSizeMode } from '../lib/modes';
 import { OPERATION_META } from '../lib/operationMeta';
+import { loadCustomSize, saveCustomSize } from '../lib/storage';
 import NumberField from '../components/NumberField';
 
 export default function CustomConfig({
@@ -15,14 +16,22 @@ export default function CustomConfig({
 }) {
   const meta = OPERATION_META[operation];
   const isTwoOperand = meta.operandCount === 2;
-  const [sizeA, setSizeA] = useState(operation === 'division' ? Math.min(5, meta.sizeLimits.a) : Math.min(3, meta.sizeLimits.a));
-  const [sizeB, setSizeB] = useState(operation === 'division' ? Math.min(2, meta.sizeLimits.b) : Math.min(3, meta.sizeLimits.b));
-  const [withRemainder, setWithRemainder] = useState(false);
+  const saved = loadCustomSize(operation);
+
+  const [sizeA, setSizeA] = useState(
+    saved?.a ?? (operation === 'division' ? Math.min(5, meta.sizeLimits.a) : Math.min(3, meta.sizeLimits.a)),
+  );
+  const [sizeB, setSizeB] = useState(
+    saved?.b ?? (operation === 'division' ? Math.min(2, meta.sizeLimits.b) : Math.min(3, meta.sizeLimits.b)),
+  );
+  const [withRemainder, setWithRemainder] = useState(saved?.withRemainder ?? false);
 
   const [labelA, labelB] = meta.fieldLabels;
 
   function handleContinue() {
-    onContinue(buildCustomSizeMode(operation, { a: sizeA, b: isTwoOperand ? sizeB : sizeA, withRemainder }));
+    const settings = { a: sizeA, b: isTwoOperand ? sizeB : sizeA, withRemainder };
+    saveCustomSize(operation, settings);
+    onContinue(buildCustomSizeMode(operation, settings));
   }
 
   return (

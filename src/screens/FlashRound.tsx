@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FlashSequence, FlashSettings, FlashVariant } from '../lib/flash';
-import { generateFlashSequence } from '../lib/flash';
+import { generateFlashSequence, getFlashTiming } from '../lib/flash';
 
 type Phase = 'flashing' | 'answering' | 'result';
+type DisplayPhase = 'blink' | 'show';
+
+function newSequence(variant: FlashVariant, settings: FlashSettings): FlashSequence {
+  return generateFlashSequence(variant, settings.iterations, settings.startingNumber, settings.numberDigits, settings.digitPool);
+}
 
 export default function FlashRound({
   variant,
@@ -17,10 +22,9 @@ export default function FlashRound({
 }) {
   const isSubtraction = variant === 'subtraction';
 
-  const [sequence, setSequence] = useState<FlashSequence>(() =>
-    generateFlashSequence(variant, settings.iterations, settings.startingNumber, settings.numberDigits),
-  );
+  const [sequence, setSequence] = useState<FlashSequence>(() => newSequence(variant, settings));
   const [phase, setPhase] = useState<Phase>('flashing');
+  const [displayPhase, setDisplayPhase] = useState<DisplayPhase>('blink');
   const [index, setIndex] = useState(0);
   const [answerInput, setAnswerInput] = useState('');
   const [correct, setCorrect] = useState(false);
@@ -33,9 +37,17 @@ export default function FlashRound({
       setPhase('answering');
       return;
     }
-    const timer = setTimeout(() => setIndex((i) => i + 1), settings.intervalSeconds * 1000);
+    const { blinkMs, showMs } = getFlashTiming(settings.intervalSeconds);
+    if (displayPhase === 'blink') {
+      const timer = setTimeout(() => setDisplayPhase('show'), blinkMs);
+      return () => clearTimeout(timer);
+    }
+    const timer = setTimeout(() => {
+      setDisplayPhase('blink');
+      setIndex((i) => i + 1);
+    }, showMs);
     return () => clearTimeout(timer);
-  }, [phase, index, sequence, settings.intervalSeconds]);
+  }, [phase, index, displayPhase, sequence, settings.intervalSeconds]);
 
   useEffect(() => {
     if (phase === 'answering') inputRef.current?.focus();
@@ -49,8 +61,9 @@ export default function FlashRound({
   }
 
   function practiceAgain() {
-    setSequence(generateFlashSequence(variant, settings.iterations, settings.startingNumber, settings.numberDigits));
+    setSequence(newSequence(variant, settings));
     setIndex(0);
+    setDisplayPhase('blink');
     setAnswerInput('');
     setPhase('flashing');
   }
@@ -81,7 +94,9 @@ export default function FlashRound({
 
       {phase === 'flashing' && (
         <div className="flash-area">
-          <div className="flash-number-display">{sequence.numbers[index]}</div>
+          <div className={`flash-number-display ${displayPhase === 'blink' ? 'blank' : ''}`}>
+            {displayPhase === 'show' ? sequence.numbers[index] : ''}
+          </div>
         </div>
       )}
 

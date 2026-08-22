@@ -34,7 +34,7 @@ export const OPERATION_META: Record<Operation, OperationMeta> = {
     fieldLabels: ['First number — digits', 'Second number — digits'],
     sizeLimits: { a: 12, b: 12 },
     customNumberNote:
-      "Both numbers are built only from the digits you pick, so the same digits line up column by column — perfect for drilling exact combinations like 7 + 8.",
+      'Build your own list of digit pairs (like 3 with 8) — each pair lines up in the same column, so you can drill exact combinations on purpose. Saved for next time.',
     supportsRemainder: false,
   },
   subtraction: {
@@ -47,7 +47,7 @@ export const OPERATION_META: Record<Operation, OperationMeta> = {
     fieldLabels: ['First number — digits', 'Second number — digits'],
     sizeLimits: { a: 12, b: 12 },
     customNumberNote:
-      'Both numbers are built only from the digits you pick, so the tricky borrow pairs you want to drill line up column by column.',
+      'Build your own list of digit pairs (top digit, bottom digit) — each pair lines up in the same column, great for drilling exact borrow cases. Saved for next time.',
     supportsRemainder: false,
   },
   multiplication: {

@@ -1,5 +1,6 @@
-import { randomWithDigits, randomWithDigitsFromPool, randInt } from './random';
+import { randomWithDigits, randomWithDigitsFromPool, randInt, pick } from './random';
 import type { ModeDef, Problem, Operation } from '../types';
+import type { DigitPair } from './storage';
 
 export const DIGIT_SIZE_MIN = 1;
 export const ALL_DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -130,24 +131,6 @@ export function makeCubeRootProblem(rootDigits: number): Problem {
 
 // --- Custom Numbers generators (digits drawn only from a chosen pool) ---
 
-export function makeAdditionCustomNumberProblem(digits: number, pool: number[]): Problem {
-  const a = randomWithDigitsFromPool(digits, pool);
-  const b = randomWithDigitsFromPool(digits, pool);
-  const [x, y] = Math.random() < 0.5 ? [a, b] : [b, a];
-  return { question: `${x} + ${y}`, answer: x + y, hasRemainder: false };
-}
-
-export function makeSubtractionCustomNumberProblem(digits: number, pool: number[]): Problem {
-  const a = randomWithDigitsFromPool(digits, pool);
-  const b = randomWithDigitsFromPool(digits, pool);
-  let minuend = Math.max(a, b);
-  let subtrahend = Math.min(a, b);
-  if (minuend === subtrahend) {
-    subtrahend = subtrahend > 1 ? subtrahend - 1 : subtrahend;
-  }
-  return { question: `${minuend} - ${subtrahend}`, answer: minuend - subtrahend, hasRemainder: false };
-}
-
 export function makeMultiplicationCustomNumberProblem(digitsA: number, digitsB: number, pool: number[]): Problem {
   const a = randomWithDigitsFromPool(digitsA, pool);
   const b = randomWithDigitsFromPool(digitsB, pool);
@@ -216,6 +199,60 @@ export function makeSquareRootCustomNumberProblem(rootDigits: number, pool: numb
 export function makeCubeRootCustomNumberProblem(rootDigits: number, pool: number[]): Problem {
   const root = randomWithDigitsFromPool(rootDigits, pool);
   return { question: `∛${root ** 3}`, answer: root, hasRemainder: false };
+}
+
+// --- Custom Numbers for addition/subtraction: digit pairs pinned to the same column ---
+
+export function makeAdditionPairProblem(numDigits: number, pairs: DigitPair[]): Problem {
+  const digitsA: number[] = [];
+  const digitsB: number[] = [];
+  for (let i = 0; i < numDigits; i++) {
+    const [x, y] = pick(pairs);
+    if (Math.random() < 0.5) {
+      digitsA.push(x);
+      digitsB.push(y);
+    } else {
+      digitsA.push(y);
+      digitsB.push(x);
+    }
+  }
+  const a = parseInt(digitsA.join(''), 10);
+  const b = parseInt(digitsB.join(''), 10);
+  return { question: `${a} + ${b}`, answer: a + b, hasRemainder: false };
+}
+
+export function makeSubtractionPairProblem(numDigits: number, pairs: DigitPair[]): Problem {
+  const leadingPool = pairs.filter(([top, bottom]) => top > bottom);
+  const topDigits: number[] = [];
+  const bottomDigits: number[] = [];
+  for (let i = 0; i < numDigits; i++) {
+    const pool = i === 0 && leadingPool.length > 0 ? leadingPool : pairs;
+    const [top, bottom] = pick(pool);
+    topDigits.push(top);
+    bottomDigits.push(bottom);
+  }
+  const minuend = parseInt(topDigits.join(''), 10);
+  const subtrahend = parseInt(bottomDigits.join(''), 10);
+  return { question: `${minuend} - ${subtrahend}`, answer: minuend - subtrahend, hasRemainder: false };
+}
+
+export function buildPairCustomNumberMode(operation: 'addition' | 'subtraction', numDigits: number, pairs: DigitPair[]): ModeDef {
+  if (operation === 'addition') {
+    return {
+      id: `add-pairs-${numDigits}-${pairs.map((p) => p.join('')).join('_')}`,
+      label: `Custom Numbers Addition (${numDigits}-digit)`,
+      operation,
+      group: 'customNumbers',
+      generate: () => makeAdditionPairProblem(numDigits, pairs),
+    };
+  }
+  return {
+    id: `sub-pairs-${numDigits}-${pairs.map((p) => p.join('')).join('_')}`,
+    label: `Custom Numbers Subtraction (${numDigits}-digit)`,
+    operation,
+    group: 'customNumbers',
+    generate: () => makeSubtractionPairProblem(numDigits, pairs),
+  };
 }
 
 // --- Default (preset) modes ---
@@ -369,26 +406,13 @@ export function buildCustomSizeMode(operation: Operation, params: SizeParams): M
 }
 
 // --- Custom Numbers: pick a digit pool + digit length(s) ---
+// Addition and subtraction use digit *pairs* instead — see buildPairCustomNumberMode above.
 
-export function buildCustomNumberMode(operation: Operation, params: SizeParams, pool: number[]): ModeDef {
+export type PoolCustomNumberOperation = Exclude<Operation, 'addition' | 'subtraction'>;
+
+export function buildCustomNumberMode(operation: PoolCustomNumberOperation, params: SizeParams, pool: number[]): ModeDef {
   const { a, b, withRemainder } = params;
   switch (operation) {
-    case 'addition':
-      return {
-        id: `add-nums-${a}-${pool.join('')}`,
-        label: `Custom Numbers Addition (${a}-digit)`,
-        operation,
-        group: 'customNumbers',
-        generate: () => makeAdditionCustomNumberProblem(a, pool),
-      };
-    case 'subtraction':
-      return {
-        id: `sub-nums-${a}-${pool.join('')}`,
-        label: `Custom Numbers Subtraction (${a}-digit)`,
-        operation,
-        group: 'customNumbers',
-        generate: () => makeSubtractionCustomNumberProblem(a, pool),
-      };
     case 'multiplication':
       return {
         id: `mul-nums-${a}-${b}-${pool.join('')}`,

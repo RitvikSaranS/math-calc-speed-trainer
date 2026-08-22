@@ -8,6 +8,7 @@ import Guide from './screens/Guide';
 import ModeSelect from './screens/ModeSelect';
 import CustomConfig from './screens/CustomConfig';
 import CustomNumberConfig from './screens/CustomNumberConfig';
+import PairCustomNumberConfig from './screens/PairCustomNumberConfig';
 import MasterSelect from './screens/MasterSelect';
 import Practice, { type SessionResult } from './screens/Practice';
 import Summary from './screens/Summary';
@@ -21,11 +22,14 @@ type Screen =
   | 'modes'
   | 'customSize'
   | 'customNumbers'
+  | 'customNumberPairs'
   | 'master'
   | 'practice'
   | 'summary'
   | 'flashSetup'
   | 'flashRound';
+
+const PAIR_OPERATIONS: Operation[] = ['addition', 'subtraction'];
 
 function App() {
   const { preference, setThemePreference } = useTheme();
@@ -56,7 +60,7 @@ function App() {
 
   function openCustomNumbers(op: Operation) {
     setOperation(op);
-    setScreen('customNumbers');
+    setScreen(PAIR_OPERATIONS.includes(op) ? 'customNumberPairs' : 'customNumbers');
   }
 
   function startPractice(masterMode: MasterMode, count: number) {
@@ -108,8 +112,12 @@ function App() {
         <CustomConfig operation={operation} onContinue={selectMode} onBack={() => setScreen('modes')} />
       )}
 
-      {screen === 'customNumbers' && operation && (
+      {screen === 'customNumbers' && operation && operation !== 'addition' && operation !== 'subtraction' && (
         <CustomNumberConfig operation={operation} onContinue={selectMode} onBack={() => setScreen('modes')} />
+      )}
+
+      {screen === 'customNumberPairs' && (operation === 'addition' || operation === 'subtraction') && (
+        <PairCustomNumberConfig operation={operation} onContinue={selectMode} onBack={() => setScreen('modes')} />
       )}
 
       {screen === 'master' && mode && (

@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import type { ModeDef, Operation } from '../types';
+import type { ModeDef } from '../types';
+import type { PoolCustomNumberOperation } from '../lib/modes';
 import { DIGIT_SIZE_MIN, buildCustomNumberMode } from '../lib/modes';
 import { OPERATION_META } from '../lib/operationMeta';
+import { loadCustomNumberPool, saveCustomNumberPool } from '../lib/storage';
 import NumberField from '../components/NumberField';
 import DigitPoolPicker from '../components/DigitPoolPicker';
 
@@ -10,21 +12,27 @@ export default function CustomNumberConfig({
   onContinue,
   onBack,
 }: {
-  operation: Operation;
+  operation: PoolCustomNumberOperation;
   onContinue: (mode: ModeDef) => void;
   onBack: () => void;
 }) {
   const meta = OPERATION_META[operation];
   const isTwoOperand = meta.operandCount === 2;
-  const [sizeA, setSizeA] = useState(operation === 'division' ? Math.min(4, meta.sizeLimits.a) : Math.min(2, meta.sizeLimits.a));
-  const [sizeB, setSizeB] = useState(operation === 'division' ? Math.min(2, meta.sizeLimits.b) : Math.min(2, meta.sizeLimits.b));
-  const [withRemainder, setWithRemainder] = useState(false);
-  const [pool, setPool] = useState<number[]>([7, 8, 9]);
+  const saved = loadCustomNumberPool(operation);
+
+  const [sizeA, setSizeA] = useState(
+    saved?.a ?? (operation === 'division' ? Math.min(4, meta.sizeLimits.a) : Math.min(2, meta.sizeLimits.a)),
+  );
+  const [sizeB, setSizeB] = useState(saved?.b ?? Math.min(2, meta.sizeLimits.b));
+  const [withRemainder, setWithRemainder] = useState(saved?.withRemainder ?? false);
+  const [pool, setPool] = useState<number[]>(saved?.pool ?? [7, 8, 9]);
 
   const [labelA, labelB] = meta.fieldLabels;
 
   function handleContinue() {
-    onContinue(buildCustomNumberMode(operation, { a: sizeA, b: isTwoOperand ? sizeB : sizeA, withRemainder }, pool));
+    const settings = { a: sizeA, b: isTwoOperand ? sizeB : sizeA, withRemainder, pool };
+    saveCustomNumberPool(operation, settings);
+    onContinue(buildCustomNumberMode(operation, settings, pool));
   }
 
   return (

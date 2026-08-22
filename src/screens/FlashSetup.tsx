@@ -10,6 +10,7 @@ import {
   FLASH_DIGITS_MAX,
   FLASH_DIGITS_MIN,
 } from '../lib/flash';
+import { flattenDigits, loadFlashSettings, loadPairs, saveFlashSettings } from '../lib/storage';
 import NumberField from '../components/NumberField';
 import DecimalField from '../components/DecimalField';
 
@@ -23,10 +24,27 @@ export default function FlashSetup({
   onBack: () => void;
 }) {
   const isSubtraction = variant === 'subtraction';
-  const [iterations, setIterations] = useState(10);
-  const [intervalSeconds, setIntervalSeconds] = useState(1);
-  const [startingNumber, setStartingNumber] = useState(1000);
-  const [numberDigits, setNumberDigits] = useState(2);
+  const saved = loadFlashSettings(variant);
+
+  const [iterations, setIterations] = useState(saved?.iterations ?? 10);
+  const [intervalSeconds, setIntervalSeconds] = useState(saved?.intervalSeconds ?? 1);
+  const [startingNumber, setStartingNumber] = useState(saved?.startingNumber ?? 1000);
+  const [numberDigits, setNumberDigits] = useState(saved?.numberDigits ?? 2);
+  const [usePairs, setUsePairs] = useState(saved?.usePairs ?? false);
+
+  const savedPairs = loadPairs(variant);
+  const pairDigits = flattenDigits(savedPairs);
+
+  function handleStart() {
+    saveFlashSettings(variant, { iterations, intervalSeconds, startingNumber, numberDigits, usePairs });
+    onContinue({
+      iterations,
+      intervalSeconds,
+      startingNumber: isSubtraction ? startingNumber : 0,
+      numberDigits,
+      digitPool: usePairs ? pairDigits : undefined,
+    });
+  }
 
   return (
     <div className="screen">
@@ -73,12 +91,14 @@ export default function FlashSetup({
         />
       </div>
 
-      <button
-        className="primary-button"
-        onClick={() =>
-          onContinue({ iterations, intervalSeconds, startingNumber: isSubtraction ? startingNumber : 0, numberDigits })
-        }
-      >
+      {pairDigits.length > 0 && (
+        <label className="custom-field custom-field-checkbox">
+          <input type="checkbox" checked={usePairs} onChange={(e) => setUsePairs(e.target.checked)} />
+          <span>Use my saved digit pairs from Custom Numbers (digits: {pairDigits.join(', ')})</span>
+        </label>
+      )}
+
+      <button className="primary-button" onClick={handleStart}>
         Start
       </button>
     </div>
