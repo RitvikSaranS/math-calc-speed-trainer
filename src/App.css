@@ -726,6 +726,29 @@
   margin: 0.5rem 0 0;
 }
 
+.guide-diagram {
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.guide-diagram-svg {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin: 0 auto;
+  color: var(--text);
+}
+
+.guide-diagram-caption {
+  max-width: 320px;
+  margin: 0.5rem auto 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .coming-soon-grid {
   display: flex;
   flex-direction: column;

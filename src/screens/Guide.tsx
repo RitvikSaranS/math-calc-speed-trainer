@@ -1,4 +1,5 @@
 import { OPERATION_META } from '../lib/operationMeta';
+import ColumnFlowDiagram from '../components/ColumnFlowDiagram';
 
 const COMING_SOON: { operation: keyof typeof OPERATION_META; note: string }[] = [
   { operation: 'multiplication', note: 'Coming soon.' },
@@ -47,6 +48,19 @@ export default function Guide({ onBack }: { onBack: () => void }) {
           <p className="guide-line">Peek units: 7 + 8 = 15 → ≥ 10, so a carry is coming → 12 + 1 = <strong>13</strong></p>
           <p className="guide-line">Units: 7 + 8 = 15 → write just the ones digit, <strong>5</strong></p>
           <p className="guide-result">13, then 5 → 135</p>
+          <ColumnFlowDiagram
+            id="add"
+            ariaLabel="Column diagram of 57 plus 78: the units column sums to 15, which sends a carry of 1 into the tens column, turning 12 into 13; the final answer is 135."
+            caption="The units carry (7+8=15) flows left and bumps the tens sum from 12 to 13 before you ever write a digit."
+            operator="+"
+            columnLabels={['Tens', 'Units']}
+            topDigits={['5', '7']}
+            bottomDigits={['7', '8']}
+            rawLabels={['5+7=12', '7+8=15']}
+            mechanismLabel="carries 1 left"
+            finalDigits={['13', '5']}
+            answer="135"
+          />
         </div>
 
         <div className="guide-example">
@@ -92,6 +106,19 @@ export default function Guide({ onBack }: { onBack: () => void }) {
           <p className="guide-line">Tens: 8 − 4 = 4. Peek units: 2 vs 7 → 2 &lt; 7, borrow coming → 4 − 1 = <strong>3</strong></p>
           <p className="guide-line">Units: 2 &lt; 7, so 2 + (10 − 7) = <strong>5</strong></p>
           <p className="guide-result">3, then 5 → 35</p>
+          <ColumnFlowDiagram
+            id="sub"
+            ariaLabel="Column diagram of 82 minus 47: the units column needs to borrow because 2 is less than 7, which pulls 1 away from the tens result, turning 4 into 3; the final answer is 35."
+            caption="Units needs a borrow (2 < 7), which pulls 1 away from the tens result before you write a digit."
+            operator="−"
+            columnLabels={['Tens', 'Units']}
+            topDigits={['8', '2']}
+            bottomDigits={['4', '7']}
+            rawLabels={['8−4=4', '2 < 7']}
+            mechanismLabel="borrows 1 left"
+            finalDigits={['3', '5']}
+            answer="35"
+          />
         </div>
 
         <div className="guide-example">
